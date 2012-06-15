@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameOfLifeModule", "GameOfLifeModule\GameOfLifeModule.vcxproj", "{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameOfLifeTester", "GameOfLifeTester\GameOfLifeTester.vcxproj", "{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7} = {274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Kinect|Win32 = Debug Kinect|Win32
+		Debug|Win32 = Debug|Win32
+		Release Kinect|Win32 = Release Kinect|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}.Debug Kinect|Win32.ActiveCfg = Debug Kinect|Win32
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}.Debug Kinect|Win32.Build.0 = Debug Kinect|Win32
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}.Debug|Win32.Build.0 = Debug|Win32
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}.Release Kinect|Win32.ActiveCfg = Release Kinect|Win32
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}.Release Kinect|Win32.Build.0 = Release Kinect|Win32
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}.Release|Win32.ActiveCfg = Release|Win32
+		{274FEF87-DA7A-49F9-A58B-FA0393D2CAB7}.Release|Win32.Build.0 = Release|Win32
+		{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}.Debug Kinect|Win32.ActiveCfg = Debug Kinect|Win32
+		{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}.Debug Kinect|Win32.Build.0 = Debug Kinect|Win32
+		{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}.Debug|Win32.Build.0 = Debug|Win32
+		{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}.Release Kinect|Win32.ActiveCfg = Release Kinect|Win32
+		{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}.Release Kinect|Win32.Build.0 = Release Kinect|Win32
+		{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}.Release|Win32.ActiveCfg = Release|Win32
+		{E7E7DE87-23F0-4BF1-806F-E0A0068229FE}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
