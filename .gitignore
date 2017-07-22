@@ -8,3 +8,8 @@
 *.includes
 *.creator*
 *.user
+Release
+Debug
+Win32
+*.VC*
+*.suo

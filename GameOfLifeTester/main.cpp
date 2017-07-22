@@ -20,8 +20,8 @@
  */
 
 // OpenGL Graphics Includes
-#include <GL/freeglut.h>
 #include <GL/glew.h>
+#include <GL/freeglut.h>
 
 // Includes
 #include <cassert>
