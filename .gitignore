@@ -1,3 +1,5 @@
+Build/
+.vs/
 ./
 .DS_Store
 *~
@@ -8,8 +10,4 @@
 *.includes
 *.creator*
 *.user
-Release
-Debug
-Win32
 *.VC*
-*.suo
