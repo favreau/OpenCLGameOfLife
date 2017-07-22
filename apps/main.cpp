@@ -50,11 +50,6 @@ int device = 0;
 // Scene
 float transparentColor = 0.1f;
 
-#ifdef USE_KINECT
-const float gSkeletonSize = 200.0;
-const float gSkeletonThickness = 20.0;
-#endif // USE_KINECT
-
 // OpenGL
 GLubyte *ubImage;
 int previousFps = 0;
@@ -93,284 +88,275 @@ float translate_z = -3.0;
 OpenCLKernel *oclKernel = 0;
 unsigned int *uiOutput = NULL;
 
-float getRandomValue(int range, int safeZone, bool allowNegativeValues = true) {
-  float value(static_cast<float>(rand() % range) + safeZone);
-  if (allowNegativeValues) {
-    value *= (rand() % 2 == 0) ? -1 : 1;
-  }
-  return value;
+float getRandomValue(int range, int safeZone, bool allowNegativeValues = true)
+{
+    float value(static_cast<float>(rand() % range) + safeZone);
+    if (allowNegativeValues)
+    {
+        value *= (rand() % 2 == 0) ? -1 : 1;
+    }
+    return value;
 }
 
-void idle() {}
+void idle()
+{
+}
 
-void cleanup() {}
+void cleanup()
+{
+}
 
 /*
 --------------------------------------------------------------------------------
 setup the window and assign callbacks
 --------------------------------------------------------------------------------
 */
-void initgl(int argc, char **argv) {
-  size_t len(window_width * window_height * window_depth);
-  ubImage = new GLubyte[len];
-  memset(ubImage, 0, len);
+void initgl(int argc, char **argv)
+{
+    size_t len(window_width * window_height * window_depth);
+    ubImage = new GLubyte[len];
+    memset(ubImage, 0, len);
 
-  glutInit(&argc, (char **)argv);
-  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+    glutInit(&argc, (char **)argv);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 
-  glutInitWindowPosition(glutGet(GLUT_SCREEN_WIDTH) / 2 - window_width / 2,
-                         glutGet(GLUT_SCREEN_HEIGHT) / 2 - window_height / 2);
+    glutInitWindowPosition(glutGet(GLUT_SCREEN_WIDTH) / 2 - window_width / 2,
+                           glutGet(GLUT_SCREEN_HEIGHT) / 2 - window_height / 2);
 
-  glutInitWindowSize(window_width, window_height);
-  glutCreateWindow("OpenCL GameOfLife");
+    glutInitWindowSize(window_width, window_height);
+    glutCreateWindow("OpenCL GameOfLife");
 
-  glutDisplayFunc(display); // register GLUT callback functions
-  glutKeyboardFunc(keyboard);
-  glutMouseFunc(mouse);
-  glutMotionFunc(motion);
-  glutTimerFunc(REFRESH_DELAY, timerEvent, 1);
-  return;
+    glutDisplayFunc(display); // register GLUT callback functions
+    glutKeyboardFunc(keyboard);
+    glutMouseFunc(mouse);
+    glutMotionFunc(motion);
+    glutTimerFunc(REFRESH_DELAY, timerEvent, 1);
+    return;
 }
 
-void TexFunc(void) {
-  glEnable(GL_TEXTURE_2D);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+void TexFunc(void)
+{
+    glEnable(GL_TEXTURE_2D);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, window_width, window_height, 0, GL_RGBA,
-               GL_UNSIGNED_BYTE, ubImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, window_width, window_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, ubImage);
 
-  glBegin(GL_QUADS);
-  glTexCoord2f(1.0, 1.0);
-  glVertex3f(-1.0, 1.0, 0.0);
-  glTexCoord2f(0.0, 1.0);
-  glVertex3f(1.0, 1.0, 0.0);
-  glTexCoord2f(0.0, 0.0);
-  glVertex3f(1.0, -1.0, 0.0);
-  glTexCoord2f(1.0, 0.0);
-  glVertex3f(-1.0, -1.0, 0.0);
-  glEnd();
+    glBegin(GL_QUADS);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f(-1.0, 1.0, 0.0);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f(1.0, 1.0, 0.0);
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f(1.0, -1.0, 0.0);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f(-1.0, -1.0, 0.0);
+    glEnd();
 
-  glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
 }
 
 // Display callback
 //*****************************************************************************
-void display() {
-  // clear graphics
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void display()
+{
+    // clear graphics
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  char text[255];
-  long t = GetTickCount();
-  oclKernel->render(window_width, window_height, (BYTE *)ubImage,
-                    transparentColor);
-  t = GetTickCount() - t;
-  sprintf(text, "OpenCL GameOfLife (%d Fps)", 1000 / ((t + previousFps) / 2));
-  previousFps = t;
+    char text[255];
+    long t = GetTickCount();
+    oclKernel->render(window_width, window_height, (BYTE *)ubImage, transparentColor);
+    t = GetTickCount() - t;
+    sprintf(text, "OpenCL GameOfLife (%d Fps)", 1000 / ((t + previousFps) / 2));
+    previousFps = t;
 
-  TexFunc();
-  glutSetWindowTitle(text);
-  glFlush();
+    TexFunc();
+    glutSetWindowTitle(text);
+    glFlush();
 
-  glutSwapBuffers();
+    glutSwapBuffers();
 }
 
-void timerEvent(int value) {
-#if USE_KINECT
-  oclKernel->updateSkeletons(
-      0.0, gSkeletonSize - 200, -150.0, // Position
-      gSkeletonSize,                    // Skeleton size
-      gSkeletonThickness, 0,            // Default size and material
-      gSkeletonThickness * 2.0f, 10,    // Head size and material
-      gSkeletonThickness * 1.5f, 1,     // Hands size and material
-      gSkeletonThickness * 1.8f, 10     // Feet size and material
-      );
-#endif // USE_KINEXT
-
-#if 0
-   //oclKernel->rotatePrimitive( 2, 10.f*cos(anim), 10.f*sin(anim), 0.f );
-   for( int i(0); i<3; ++i )
-   {
-      activeSphereCenter[i].s[0] += activeSphereDirection[i].s[0];
-      activeSphereCenter[i].s[1]  = -200 + activeSphereCenter[i].s[3] + ((i==0) ? 0 : activeSphereCenter[i].s[3]*fabs(cos(anim/2.f+i/2.f)));
-      activeSphereCenter[i].s[2] += activeSphereDirection[i].s[2];
-      oclKernel->setPrimitive( 
-         activeSphereId+i, 
-         activeSphereCenter[i].s[0], activeSphereCenter[i].s[1], activeSphereCenter[i].s[2], 
-         activeSphereCenter[i].s[3], activeSphereCenter[i].s[3], 
-         activeSphereMaterial[i], 1 ); 
-
-      if( fabs(activeSphereCenter[i].s[0]) > (gRoomSize-activeSphereCenter[i].s[3])) activeSphereDirection[i].s[0] = -activeSphereDirection[i].s[0];
-      if( fabs(activeSphereCenter[i].s[2]) > (gRoomSize-activeSphereCenter[i].s[3])) activeSphereDirection[i].s[2] = -activeSphereDirection[i].s[2];
-   }
-#endif // 0
-
-  glutPostRedisplay();
-  glutTimerFunc(REFRESH_DELAY, timerEvent, 0);
+void timerEvent(int value)
+{
+    glutPostRedisplay();
+    glutTimerFunc(REFRESH_DELAY, timerEvent, 0);
 }
 
-void createTextures() {
-  // Textures
-  std::stringstream str;
-  str << "../../textures/0";
-  int i = 1 + rand() % 18;
-  if (i < 10)
-    str << "0";
-  str << i;
-  str << ".bmp";
-  oclKernel->addTexture(str.str().c_str());
+void createTextures()
+{
+    // Textures
+    std::stringstream str;
+    str << "../../textures/0";
+    int i = 1 + rand() % 18;
+    if (i < 10)
+        str << "0";
+    str << i;
+    str << ".bmp";
+    oclKernel->addTexture(str.str().c_str());
 }
 
 // Keyboard events handler
 //*****************************************************************************
-void keyboard(unsigned char key, int x, int y) {
-  srand(static_cast<unsigned int>(time(NULL)));
+void keyboard(unsigned char key, int x, int y)
+{
+    srand(static_cast<unsigned int>(time(NULL)));
 
-  switch (key) {
-  case 'R':
-  case 'r': {
-    // Reset scene
-    delete oclKernel;
-    oclKernel = 0;
-    createScene(platform, device);
-    createTextures();
-    break;
-  }
-  case 'q':
-  case 'Q': {
-    transparentColor += 0.01f;
-    transparentColor = (transparentColor > 1.f) ? 1.f : transparentColor;
-    break;
-  }
-  case 'a':
-  case 'A': {
-    transparentColor -= 0.01f;
-    transparentColor = (transparentColor < 0.f) ? 0.f : transparentColor;
-    break;
-  }
-  case 'F':
-  case 'f': {
-    // Toggle to full screen mode
-    glutFullScreen();
-    break;
-  }
-  case '\033':
-  case '\015':
-  case 'X':
-  case 'x': {
-    // Cleanup up and quit
-    bNoPrompt = true;
-    Cleanup(EXIT_SUCCESS);
-    break;
-  }
-  }
+    switch (key)
+    {
+    case 'R':
+    case 'r':
+    {
+        // Reset scene
+        delete oclKernel;
+        oclKernel = 0;
+        createScene(platform, device);
+        createTextures();
+        break;
+    }
+    case 'q':
+    case 'Q':
+    {
+        transparentColor += 0.01f;
+        transparentColor = (transparentColor > 1.f) ? 1.f : transparentColor;
+        break;
+    }
+    case 'a':
+    case 'A':
+    {
+        transparentColor -= 0.01f;
+        transparentColor = (transparentColor < 0.f) ? 0.f : transparentColor;
+        break;
+    }
+    case 'F':
+    case 'f':
+    {
+        // Toggle to full screen mode
+        glutFullScreen();
+        break;
+    }
+    case '\033':
+    case '\015':
+    case 'X':
+    case 'x':
+    {
+        // Cleanup up and quit
+        bNoPrompt = true;
+        Cleanup(EXIT_SUCCESS);
+        break;
+    }
+    }
 }
 
 // Mouse event handlers
 //*****************************************************************************
-void mouse(int button, int state, int x, int y) {
-  if (state == GLUT_DOWN) {
-    mouse_buttons |= 1 << button;
-  } else {
-    if (state == GLUT_UP) {
-      mouse_buttons = 0;
+void mouse(int button, int state, int x, int y)
+{
+    if (state == GLUT_DOWN)
+    {
+        mouse_buttons |= 1 << button;
     }
-  }
-  mouse_old_x = x;
-  mouse_old_y = y;
+    else
+    {
+        if (state == GLUT_UP)
+        {
+            mouse_buttons = 0;
+        }
+    }
+    mouse_old_x = x;
+    mouse_old_y = y;
 }
 
-void motion(int x, int y) {
-  switch (mouse_buttons) {
-  case 1:
-    break;
-  case 2:
-    break;
-  case 4:
-    break;
-  }
+void motion(int x, int y)
+{
+    switch (mouse_buttons)
+    {
+    case 1:
+        break;
+    case 2:
+        break;
+    case 4:
+        break;
+    }
 }
 
 // Function to clean up and exit
 //*****************************************************************************
-void Cleanup(int iExitCode) {
-  // Cleanup allocated objects
-  std::cout << "\nStarting Cleanup...\n\n" << std::endl;
-  if (ubImage)
-    delete[] ubImage;
-  delete oclKernel;
+void Cleanup(int iExitCode)
+{
+    // Cleanup allocated objects
+    std::cout << "\nStarting Cleanup...\n\n" << std::endl;
+    if (ubImage)
+        delete[] ubImage;
+    delete oclKernel;
 
-  exit(iExitCode);
+    exit(iExitCode);
 }
 
-void createScene(int platform, int device) {
-  srand(static_cast<unsigned int>(time(NULL)));
+void createScene(int platform, int device)
+{
+    srand(static_cast<unsigned int>(time(NULL)));
 
-  oclKernel = new OpenCLKernel(platform, device, 128, draft);
-  oclKernel->initializeDevice(window_width, window_height);
-  oclKernel->compileKernels(kst_file, "../../gol/Kernel.cl", "", "");
-
-#ifdef USE_KINECT
-  nbPrimitives = oclKernel->addPrimitive(ptCamera);
-  oclKernel->setPrimitive(nbPrimitives, 0, 100, gRoomSize - 10, 320, 240, 0, 1);
-/*
-nbPrimitives = oclKernel->addPrimitive( ptXYPlane );
-oclKernel->setPrimitive( nbPrimitives, 0, 0, 0, 320, 240, 0, 1 );
-*/
-#endif // USE_KINECT
+    oclKernel = new OpenCLKernel(platform, device, 128, draft);
+    oclKernel->initializeDevice(window_width, window_height);
+    oclKernel->compileKernels(kst_file, "../../gol/Kernel.cl", "", "");
 }
 
-void main(int argc, char *argv[]) {
-  std::cout << "---------------------------------------------------------------"
-               "-----------------"
-            << std::endl;
-  std::cout << "Keys:" << std::endl;
-  std::cout << "  s: add sphere" << std::endl;
-  std::cout << "  y: add cylinder" << std::endl;
-  std::cout << "  c: add cube" << std::endl;
-  std::cout << "  p: add plan (single faced)" << std::endl;
-  std::cout << "  l: add lamp" << std::endl;
-  std::cout << "  r: reset scene" << std::endl;
-  std::cout << "Mouse:" << std::endl;
-  std::cout << "  left       : Zoom in/out" << std::endl;
-  std::cout << "  middle     : Rotate" << std::endl;
-  std::cout << "  right      : Translate" << std::endl;
-  std::cout << "  shift+left : Depth of view" << std::endl;
-  std::cout << std::endl;
-  std::cout << "---------------------------------------------------------------"
-               "-----------------"
-            << std::endl;
-  if (argc == 5) {
-    std::cout << argv[1] << std::endl;
-    sscanf_s(argv[1], "%d", &platform);
-    sscanf_s(argv[2], "%d", &device);
-    sscanf_s(argv[3], "%d", &window_width);
-    sscanf_s(argv[4], "%d", &window_height);
-  } else {
-    std::cout << "Usage:" << std::endl;
-    std::cout << "  golViewer [platformId] [deviceId] "
-                 "[WindowWidth] [WindowHeight]"
+void main(int argc, char *argv[])
+{
+    std::cout << "---------------------------------------------------------------"
+                 "-----------------"
               << std::endl;
+    std::cout << "Keys:" << std::endl;
+    std::cout << "  s: add sphere" << std::endl;
+    std::cout << "  y: add cylinder" << std::endl;
+    std::cout << "  c: add cube" << std::endl;
+    std::cout << "  p: add plan (single faced)" << std::endl;
+    std::cout << "  l: add lamp" << std::endl;
+    std::cout << "  r: reset scene" << std::endl;
+    std::cout << "Mouse:" << std::endl;
+    std::cout << "  left       : Zoom in/out" << std::endl;
+    std::cout << "  middle     : Rotate" << std::endl;
+    std::cout << "  right      : Translate" << std::endl;
+    std::cout << "  shift+left : Depth of view" << std::endl;
     std::cout << std::endl;
-    std::cout << "Example:" << std::endl;
-    std::cout << "  OpenCLGameOfLifeTester.exe 0 1 640 480" << std::endl;
-    std::cout << std::endl;
-    exit(1);
-  }
-  // First initialize OpenGL context, so we can properly set the GL for CUDA.
-  // This is necessary in order to achieve optimal performance with OpenGL/CUDA
-  // interop.
-  initgl(argc, argv);
+    std::cout << "---------------------------------------------------------------"
+                 "-----------------"
+              << std::endl;
+    if (argc == 5)
+    {
+        std::cout << argv[1] << std::endl;
+        sscanf_s(argv[1], "%d", &platform);
+        sscanf_s(argv[2], "%d", &device);
+        sscanf_s(argv[3], "%d", &window_width);
+        sscanf_s(argv[4], "%d", &window_height);
+    }
+    else
+    {
+        std::cout << "Usage:" << std::endl;
+        std::cout << "  golViewer [platformId] [deviceId] "
+                     "[WindowWidth] [WindowHeight]"
+                  << std::endl;
+        std::cout << std::endl;
+        std::cout << "Example:" << std::endl;
+        std::cout << "  OpenCLGameOfLifeTester.exe 0 1 640 480" << std::endl;
+        std::cout << std::endl;
+        exit(1);
+    }
+    // First initialize OpenGL context, so we can properly set the GL for CUDA.
+    // This is necessary in order to achieve optimal performance with OpenGL/CUDA
+    // interop.
+    initgl(argc, argv);
 
-  // Create Scene
-  createScene(platform, device);
-  createTextures();
+    // Create Scene
+    createScene(platform, device);
+    createTextures();
 
-  atexit(cleanup);
-  glutMainLoop();
+    atexit(cleanup);
+    glutMainLoop();
 
-  // Normally unused return path
-  Cleanup(EXIT_SUCCESS);
+    // Normally unused return path
+    Cleanup(EXIT_SUCCESS);
 }

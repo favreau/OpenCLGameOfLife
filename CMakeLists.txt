@@ -29,6 +29,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 IF(MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DNOMINMAX)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF()
 
 # ================================================================================
